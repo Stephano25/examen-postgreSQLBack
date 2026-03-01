@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { Book } from '../entities/book.entity';
 import { User } from '../entities/user.entity';
 import { Borrowing } from '../entities/borrowing.entity';
@@ -59,6 +59,7 @@ export class StatisticsService {
       .select([
         'book.id',
         'book.title',
+        'book.author',
         'COUNT(borrowing.id) as total_borrowings',
         'COUNT(CASE WHEN borrowing.returned_at IS NULL THEN 1 END) as currently_borrowed',
         'book.stock as available_stock',
@@ -72,7 +73,7 @@ export class StatisticsService {
     const totalBooks = await this.bookRepository.count();
     const totalUsers = await this.userRepository.count();
     const activeBorrowings = await this.borrowingRepository.count({
-      where: { returned_at: null },
+      where: { returned_at: IsNull() },
     });
     const totalBorrowings = await this.borrowingRepository.count();
 

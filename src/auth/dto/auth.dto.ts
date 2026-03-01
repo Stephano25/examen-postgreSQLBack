@@ -1,29 +1,34 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { User } from '../../entities/user.entity';
-import { Book } from '../../entities/book.entity';
+import { IsString, MinLength, MaxLength, IsNotEmpty, IsOptional, IsEmail } from 'class-validator';
 
-@Entity('borrowings')
-export class Borrowing {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class RegisterDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(50)
+  username: string;
 
-  @Column({ name: 'user_id' })
-  user_id: number;
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  password: string;
 
-  @Column({ name: 'book_id' })
-  book_id: number;
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+}
 
-  @CreateDateColumn({ name: 'borrowed_at' })
-  borrowed_at: Date;
+export class LoginDto {
+  @IsString()
+  @IsNotEmpty()
+  username: string;
 
-  @Column({ name: 'returned_at', nullable: true })
-  returned_at: Date;
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+}
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
-  @ManyToOne(() => Book)
-  @JoinColumn({ name: 'book_id' })
-  book: Book;
+export class RefreshTokenDto {
+  @IsString()
+  @IsNotEmpty()
+  refresh_token: string;
 }

@@ -14,17 +14,24 @@ import { StatisticsModule } from './statistics/statistics.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: +configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: false,
-        logging: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const password = configService.get('DB_PASSWORD');
+        console.log('Attempting to connect with password:', password ? '***' : 'not set');
+        
+        return {
+          type: 'postgres',
+          host: configService.get('DB_HOST', 'localhost'),
+          port: +configService.get('DB_PORT', 5432),
+          username: configService.get('DB_USERNAME', 'postgres'),
+          password: configService.get('DB_PASSWORD', 'postgres'),
+          database: configService.get('DB_DATABASE', 'libraflow'),
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: false,
+          logging: true,
+          retryAttempts: 10,
+          retryDelay: 3000,
+        };
+      },
       inject: [ConfigService],
     }),
     AuthModule,
