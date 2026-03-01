@@ -1,21 +1,4 @@
-import { IsString, MinLength, MaxLength, IsNotEmpty, IsOptional, IsEmail } from 'class-validator';
-
-export class RegisterDto {
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(3)
-  @MaxLength(50)
-  username: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(6)
-  password: string;
-
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-}
+import { IsString, MinLength, IsNotEmpty } from 'class-validator';
 
 export class LoginDto {
   @IsString()
@@ -27,8 +10,14 @@ export class LoginDto {
   password: string;
 }
 
-export class RefreshTokenDto {
+export class RegisterDto {
   @IsString()
   @IsNotEmpty()
-  refresh_token: string;
+  @MinLength(3)
+  username: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  password: string;
 }

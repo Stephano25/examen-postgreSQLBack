@@ -1,6 +1,6 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +14,16 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+    console.log('📨 BACKEND: REQUÊTE REÇUE SUR /auth/login');
+    console.log('Body reçu:', loginDto);
+    
+    try {
+      const result = await this.authService.login(loginDto);
+      console.log('✅ Réponse envoyée');
+      return result;
+    } catch (error) {
+      console.log('❌ Erreur capturée dans le controller:', error.message);
+      throw error;
+    }
   }
 }
