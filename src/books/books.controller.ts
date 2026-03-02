@@ -32,21 +32,21 @@ export class BooksController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles('admin')  // ✅ SEULEMENT ADMIN
   async create(@Body() createBookDto: CreateBookDto) {
     return this.booksService.create(createBookDto);
   }
 
   @Patch(':id')
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles('admin')  // ✅ SEULEMENT ADMIN
   async update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
     return this.booksService.update(+id, updateBookDto);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles('admin')  // ✅ SEULEMENT ADMIN
   async remove(@Param('id') id: string) {
     return this.booksService.remove(+id);
   }

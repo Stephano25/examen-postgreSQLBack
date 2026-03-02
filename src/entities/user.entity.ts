@@ -9,6 +9,9 @@ export class User {
   @Column({ unique: true })
   username: string;
 
+  @Column({ nullable: true, type: 'varchar' })
+  email: string | null;  // ✅ Accepter null
+
   @Column({ name: 'password_hash' })
   password_hash: string;
 

@@ -16,6 +16,31 @@ export class StatisticsService {
     private borrowingRepository: Repository<Borrowing>,
   ) {}
 
+  async getDashboardStats() {
+    console.log('📊 Service - Getting dashboard stats');
+    
+    const totalBooks = await this.bookRepository.count();
+    console.log('Total books:', totalBooks);
+    
+    const totalUsers = await this.userRepository.count();
+    console.log('Total users:', totalUsers);
+    
+    const activeBorrowings = await this.borrowingRepository.count({
+      where: { returned_at: IsNull() },
+    });
+    console.log('Active borrowings:', activeBorrowings);
+    
+    const totalBorrowings = await this.borrowingRepository.count();
+    console.log('Total borrowings:', totalBorrowings);
+
+    return {
+      totalBooks,
+      totalUsers,
+      activeBorrowings,
+      totalBorrowings,
+    };
+  }
+
   async getTopBooks(limit: number = 5) {
     return this.bookRepository
       .createQueryBuilder('book')
@@ -67,21 +92,5 @@ export class StatisticsService {
       .groupBy('book.id')
       .orderBy('total_borrowings', 'DESC')
       .getRawMany();
-  }
-
-  async getDashboardStats() {
-    const totalBooks = await this.bookRepository.count();
-    const totalUsers = await this.userRepository.count();
-    const activeBorrowings = await this.borrowingRepository.count({
-      where: { returned_at: IsNull() },
-    });
-    const totalBorrowings = await this.borrowingRepository.count();
-
-    return {
-      totalBooks,
-      totalUsers,
-      activeBorrowings,
-      totalBorrowings,
-    };
   }
 }

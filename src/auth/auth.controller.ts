@@ -7,22 +7,29 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+    console.log('📝 BACKEND - Tentative d\'inscription:', registerDto.username);
+    try {
+      const result = await this.authService.register(registerDto);
+      console.log('✅ Inscription réussie pour:', registerDto.username);
+      return result;
+    } catch (error) {
+      console.error('❌ Erreur inscription:', error.message);
+      throw error;
+    }
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto) {
-    console.log('📨 BACKEND: REQUÊTE REÇUE SUR /auth/login');
-    console.log('Body reçu:', loginDto);
-    
+    console.log('🔐 BACKEND - Tentative de connexion:', loginDto.username);
     try {
       const result = await this.authService.login(loginDto);
-      console.log('✅ Réponse envoyée');
+      console.log('✅ Connexion réussie pour:', loginDto.username);
       return result;
     } catch (error) {
-      console.log('❌ Erreur capturée dans le controller:', error.message);
+      console.error('❌ Erreur connexion:', error.message);
       throw error;
     }
   }

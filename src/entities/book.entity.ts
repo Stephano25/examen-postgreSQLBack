@@ -15,7 +15,7 @@ export class Book {
   @Column({ unique: true })
   isbn: string;
 
-  @Column()
+  @Column({ default: 1 })
   stock: number;
 
   @CreateDateColumn({ name: 'created_at' })
