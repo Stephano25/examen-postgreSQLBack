@@ -6,25 +6,19 @@ import {
   UseGuards, 
   Req,
   HttpException,
-  HttpStatus,
-  ValidationPipe
+  HttpStatus
 } from '@nestjs/common';
 import { BorrowingsService } from './borrowings.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { IsNumber, IsNotEmpty } from 'class-validator';
 
-// DTO pour validation
+// DTO simples sans décorateurs (la validation se fait dans le service)
 class BorrowDto {
-  @IsNumber()
-  @IsNotEmpty()
   book_id: number;
 }
 
 class ReturnDto {
-  @IsNumber()
-  @IsNotEmpty()
   borrowing_id: number;
 }
 
@@ -40,7 +34,7 @@ export class BorrowingsController {
       bookId: borrowDto?.book_id
     });
 
-    // ✅ CORRECTION: Validation manuelle
+    // Validation simple
     if (!borrowDto || typeof borrowDto.book_id !== 'number') {
       throw new HttpException(
         { message: 'book_id must be a number' },
@@ -56,15 +50,8 @@ export class BorrowingsController {
     }
 
     try {
-      const result = await this.borrowingsService.borrowBook(
-        req.user.id, 
-        borrowDto.book_id
-      );
-      
-      return {
-        data: result,
-        message: 'Book borrowed successfully'
-      };
+      const result = await this.borrowingsService.borrowBook(req.user.id, borrowDto.book_id);
+      return { data: result, message: 'Book borrowed successfully' };
     } catch (error) {
       console.error('❌ Erreur emprunt:', error);
       
@@ -94,15 +81,8 @@ export class BorrowingsController {
     }
 
     try {
-      const result = await this.borrowingsService.returnBook(
-        req.user.id, 
-        returnDto.borrowing_id
-      );
-      
-      return {
-        data: result,
-        message: 'Book returned successfully'
-      };
+      const result = await this.borrowingsService.returnBook(req.user.id, returnDto.borrowing_id);
+      return { data: result, message: 'Book returned successfully' };
     } catch (error) {
       console.error('❌ Erreur retour:', error);
       
@@ -135,8 +115,10 @@ export class BorrowingsController {
   @UseGuards(RolesGuard)
   @Roles('admin')
   async getAllBorrowings() {
+    console.log('📚 Backend - Récupération de TOUS les emprunts (admin)');
     try {
       const borrowings = await this.borrowingsService.getAllBorrowings();
+      console.log(`✅ ${borrowings.length} emprunts trouvés`);
       return { data: borrowings };
     } catch (error) {
       console.error('❌ Erreur récupération tous emprunts:', error);

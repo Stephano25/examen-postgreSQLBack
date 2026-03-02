@@ -42,12 +42,14 @@ export class StatisticsService {
   }
 
   async getTopBooks(limit: number = 5) {
-    return this.bookRepository
+    console.log('📊 Récupération top books...');
+    
+    const result = await this.bookRepository
       .createQueryBuilder('book')
       .leftJoin('book.borrowings', 'borrowing')
       .select([
         'book.id',
-        'book.title',
+        'book.title as book_title',
         'book.author',
         'book.isbn',
         'book.stock',
@@ -57,10 +59,15 @@ export class StatisticsService {
       .orderBy('borrow_count', 'DESC')
       .limit(limit)
       .getRawMany();
+    
+    console.log('✅ Top books:', result);
+    return result;
   }
 
   async getTopUsers(limit: number = 5) {
-    return this.userRepository
+    console.log('📊 Récupération top users...');
+    
+    const result = await this.userRepository
       .createQueryBuilder('user')
       .leftJoin('user.borrowings', 'borrowing')
       .select([
@@ -75,22 +82,31 @@ export class StatisticsService {
       .orderBy('borrow_count', 'DESC')
       .limit(limit)
       .getRawMany();
+  
+    console.log('✅ Top users:', result);
+    return result;
   }
 
   async getBookStatistics() {
-    return this.bookRepository
+    console.log('📊 Récupération statistiques livres...');
+    
+    const result = await this.bookRepository
       .createQueryBuilder('book')
       .leftJoin('book.borrowings', 'borrowing')
       .select([
         'book.id',
-        'book.title',
+        'book.title as book_title',
         'book.author',
-        'COUNT(borrowing.id) as total_borrowings',
-        'COUNT(CASE WHEN borrowing.returned_at IS NULL THEN 1 END) as currently_borrowed',
+        'book.isbn',
         'book.stock as available_stock',
+        'COUNT(borrowing.id) as total_borrowings',
+        'COUNT(CASE WHEN borrowing.returned_at IS NULL THEN 1 END) as currently_borrowed'
       ])
       .groupBy('book.id')
       .orderBy('total_borrowings', 'DESC')
       .getRawMany();
+  
+    console.log('✅ Statistiques livres:', result);
+    return result;
   }
 }

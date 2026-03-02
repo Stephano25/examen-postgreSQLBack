@@ -10,9 +10,9 @@ export class BorrowingsService {
   constructor(
     @InjectRepository(Borrowing)
     private borrowingRepository: Repository<Borrowing>,
-    @InjectRepository(Book)  // Maintenant disponible
+    @InjectRepository(Book)
     private bookRepository: Repository<Book>,
-    @InjectRepository(User)  // Maintenant disponible
+    @InjectRepository(User)
     private userRepository: Repository<User>,
     private dataSource: DataSource,
   ) {}
@@ -62,17 +62,16 @@ export class BorrowingsService {
         book_id: bookId,
         borrowed_at: new Date()
       });
-
       await queryRunner.manager.save(borrowing);
 
-      // Mettre à jour le stock du livre
+      // RÉDUIRE LE STOCK DU LIVRE
       book.stock -= 1;
       await queryRunner.manager.save(book);
 
       // Commit transaction
       await queryRunner.commitTransaction();
       
-      console.log(`✅ Emprunt réussi - ID: ${borrowing.id}`);
+      console.log(`✅ Emprunt réussi - ID: ${borrowing.id}, Nouveau stock: ${book.stock}`);
       
       // Récupérer l'emprunt avec les relations
       const savedBorrowing = await this.borrowingRepository.findOne({
@@ -92,7 +91,6 @@ export class BorrowingsService {
       console.error('❌ Erreur lors de l\'emprunt:', err);
       throw new InternalServerErrorException('Failed to borrow book');
     } finally {
-      // Libérer le queryRunner
       await queryRunner.release();
     }
   }
@@ -123,17 +121,17 @@ export class BorrowingsService {
       borrowing.returned_at = new Date();
       await queryRunner.manager.save(borrowing);
 
-      // Augmenter le stock du livre
+      // AUGMENTER LE STOCK DU LIVRE
       if (borrowing.book) {
         borrowing.book.stock += 1;
         await queryRunner.manager.save(borrowing.book);
+        console.log(`✅ Stock du livre ${borrowing.book.title} augmenté à ${borrowing.book.stock}`);
       }
 
       await queryRunner.commitTransaction();
       
       console.log(`✅ Retour réussi - Borrowing: ${borrowingId}`);
       
-      // Récupérer l'emprunt avec les relations
       const savedBorrowing = await this.borrowingRepository.findOne({
         where: { id: borrowingId },
         relations: ['book', 'user']
@@ -155,17 +153,27 @@ export class BorrowingsService {
   }
 
   async getUserBorrowings(userId: number): Promise<Borrowing[]> {
-    return this.borrowingRepository.find({
+    console.log(`📚 Récupération emprunts pour user ${userId}`);
+    
+    const borrowings = await this.borrowingRepository.find({
       where: { user_id: userId },
       relations: ['book'],
       order: { borrowed_at: 'DESC' }
     });
+    
+    console.log(`✅ ${borrowings.length} emprunts trouvés`);
+    return borrowings;
   }
 
   async getAllBorrowings(): Promise<Borrowing[]> {
-    return this.borrowingRepository.find({
+    console.log('📚 Backend - Récupération de TOUS les emprunts');
+    
+    const borrowings = await this.borrowingRepository.find({
       relations: ['user', 'book'],
       order: { borrowed_at: 'DESC' }
     });
+    
+    console.log(`✅ ${borrowings.length} emprunts trouvés`);
+    return borrowings;
   }
 }
